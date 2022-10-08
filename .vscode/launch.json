@@ -1,0 +1,45 @@
+{
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug executable 'rust-stm32f103с8е6'",
+			"cargo": {
+				"args": [
+					"build",
+					"--bin=rust-stm32f103с8е6",
+					"--package=rust-stm32f103с8е6"
+				],
+				"filter": {
+					"name": "rust-stm32f103с8е6",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		},
+		{
+			"type": "lldb",
+			"request": "launch",
+			"name": "Debug unit tests in executable 'rust-stm32f103с8е6'",
+			"cargo": {
+				"args": [
+					"test",
+					"--no-run",
+					"--bin=rust-stm32f103с8е6",
+					"--package=rust-stm32f103с8е6"
+				],
+				"filter": {
+					"name": "rust-stm32f103с8е6",
+					"kind": "bin"
+				}
+			},
+			"args": [],
+			"cwd": "${workspaceFolder}"
+		}
+	]
+}
