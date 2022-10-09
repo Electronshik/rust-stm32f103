@@ -87,6 +87,8 @@ fn main() -> ! {
     let mut recv_s: String<32> = String::from("");
     let mut send_s: String<32> = String::from("");
 
+    let min_cmd_len = 2;
+
     loop {
         // receive_buff[0] = rs485i.read_next() as char;
         // let rec = rs485i.read_next();
@@ -100,7 +102,11 @@ fn main() -> ! {
                 recv_s.push(rec as char).unwrap();
                 // rs485i.send_str(&recv_s.as_str());
             } else {
-                rs485i.send_str(&recv_s.as_str());
+                break;
+            }
+
+            if recv_s.len() >= min_cmd_len {
+                // rs485i.send_str(&recv_s.as_str());
                 break;
             }
         }
@@ -122,7 +128,7 @@ fn main() -> ! {
         }
     }
 }
-//SQwasd
+
 //openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg
 //<gdb> -x openocd.gdb target/thumbv7em-none-eabihf/debug
 //set auto-load safe-path /

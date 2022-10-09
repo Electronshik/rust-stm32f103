@@ -1,1 +1,1 @@
-# rust-stm32f103с8е6
+# rust-stm32f103
