@@ -40,6 +40,17 @@
 			},
 			"args": [],
 			"cwd": "${workspaceFolder}"
+		},
+		{
+			"name": "Remote debug",
+			"type": "gdb",
+			"request": "launch",
+			"cwd": "${workspaceRoot}",
+			"target": "${workspaceRoot}/target/thumbv7m-none-eabi/debug/rust-stm32f103", 
+			"gdbpath" : "arm-none-eabi-gdb",
+			"autorun": [
+				"source -v openocd.gdb",
+			]
 		}
 	]
 }

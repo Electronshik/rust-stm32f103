@@ -14,6 +14,8 @@ use embedded_hal::digital::v2::OutputPin;
 use hal::{delay::Delay, pac, prelude::*};
 use nb::block;
 use stm32f1xx_hal as hal;
+use heapless::String;
+use core::fmt::Write;
 
 type RS485 = stm32f1xx_hal::serial::Serial<stm32f1xx_hal::pac::USART3, (stm32f1xx_hal::gpio::gpiob::PB10<stm32f1xx_hal::gpio::Alternate<stm32f1xx_hal::gpio::PushPull>>,
     stm32f1xx_hal::gpio::gpiob::PB11<stm32f1xx_hal::gpio::Input<stm32f1xx_hal::gpio::Floating>>)>;
@@ -29,7 +31,7 @@ impl RS485Iface {
     fn send_str(&mut self, str_to_send: &str) {
         self.dirpin.set_high().ok();
 
-        str_to_send.as_bytes()
+        let _ = str_to_send.as_bytes()
         .iter()
         .try_for_each(|c| block!(self.iface.write(*c)))
         .map_err(|_| core::fmt::Error);
@@ -38,7 +40,10 @@ impl RS485Iface {
     }
 
     fn read_next(&mut self) -> u8 {
-        block!(self.iface.read()).unwrap()
+        match block!(self.iface.read()) {
+            Ok(x) => x,
+            Err(_) => 0
+        }
     }
 }
 
@@ -79,24 +84,45 @@ fn main() -> ! {
 
     rs485i.send_str("RS485 Started!\r\n");
 
-    let mut receive_buff = [' '; 32];
+    let mut recv_s: String<32> = String::from("");
+    let mut send_s: String<32> = String::from("");
 
     loop {
-        receive_buff[0] = rs485i.read_next() as char;
+        // receive_buff[0] = rs485i.read_next() as char;
+        // let rec = rs485i.read_next();
+        // if rec != 0 {
+        //     recv_s.push(rec as char).unwrap();
+        // }
 
-        if receive_buff[0] == 'M' {
-            receive_buff[1] = rs485i.read_next() as char;
-            let recv_str = match receive_buff[1] {
-                '0' => "RS485 M0 received!\r\n",
-                '1' => "RS485 M1 received!\r\n",
-                 _  => "RS485 unknown cmd!\r\n",
-            };
+        loop {
+            let rec = rs485i.read_next();
+            if rec != 0 {
+                recv_s.push(rec as char).unwrap();
+                // rs485i.send_str(&recv_s.as_str());
+            } else {
+                rs485i.send_str(&recv_s.as_str());
+                break;
+            }
+        }
 
-            rs485i.send_str(recv_str);
+        match recv_s.find("S") {
+            None => {},
+            Some(i) => {
+                if recv_s.len() > 1 {
+                    let _ = write!(send_s,"RS485 S{} received!\r\n", &recv_s[i+1..]);
+                    rs485i.send_str(send_s.as_str());
+                    recv_s.clear();
+                    send_s.clear()
+                }
+            }
+        }
+
+        if recv_s.len() >= 32 {
+            recv_s.clear();
         }
     }
 }
-
+//SQwasd
 //openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg
 //<gdb> -x openocd.gdb target/thumbv7em-none-eabihf/debug
 //set auto-load safe-path /
